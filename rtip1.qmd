@@ -1,0 +1,363 @@
+---
+title: "R Tip of the Day"
+subtitle: "gt package"
+author: "Zuzanna Wasiluk"
+format: 
+  revealjs:
+    incremental: true  
+    slide-number: true
+    preview-links: auto
+    self-contained: true
+editor_options: 
+  chunk_output_type: console
+---
+```{r}
+library(tidyverse)
+library(palmerpenguins)
+library(gt)
+```
+
+## My problem
+
+- Stats 2 group project needed display tables 
+  - Professional, readable, and visually appealing tables 
+- Tibble is not visually appealing
+
+## Data Used
+::: {.nonincremental}
+```r
+penguins <- penguins |> 
+  as_tibble(
+  name = names(penguins),
+  size = bill_length_mm) |> 
+  arrange(desc(island)) |> 
+  select(year, sex, species, island, bill_length_mm) |> 
+  head(n = 20)
+  
+colors <- c("blue", "lightblue1", "deepskyblue", "deepskyblue1", "deepskyblue2","dodgerblue","navy", "red", "firebrick", "darkred", "orangered4", "orange", "orangered2", "orange3")
+preference <- c("45", "34", "23", "13", "56", "78", "77", "32", "9", "63", "41", "23", "15", "7")
+rcolors_data <- data.frame(rcolors = colors, preference = preference)
+```
+- penguins dataset from palmerpenguins package 
+- A fake dataset I created with only two variables: Rcolors and a count of St. Olaf students that favor the color
+:::
+
+```{r}
+penguins <- penguins |> 
+  as_tibble(
+  name = names(penguins),
+  size = bill_length_mm) |> 
+  arrange(desc(island)) |> 
+  select(year, sex, species, island, bill_length_mm) |> 
+  head(n = 10)
+  
+colors <- c("blue", "lightblue1", "deepskyblue", "deepskyblue1", "deepskyblue2","dodgerblue","navy", "red", "firebrick", "darkred", "orangered4", "orange", "orangered2", "orange3")
+preference <- c("45", "34", "23", "13", "56", "78", "77", "32", "9", "63", "41", "23", "15", "7")
+rcolors_data <- data.frame(rcolors = colors, preference = preference)
+```
+
+## Why gt?
+
+:::: {.columns}
+
+::: {.column width="40%"}
+- Makes it simple to produce professional-looking display tables
+- Go beyond tibbles with annotations, table element styling, and text transformations
+  - Create a simple gt table using this code: gt(penguins)
+:::
+
+::: {.column width="60%"}
+```{r}
+penguins_tbl <- gt(penguins)
+penguins_tbl
+```
+:::
+
+::::
+
+## Creating a header
+::: {.nonincremental}
+- Specify a title and a subtitle in tab_header()
+
+``` {.r code-line-numbers="2-5"}
+penguins_tbl |> 
+  tab_header(
+    title = "Large Bills",
+    subtitle = " By species, island, sex, and year"
+  ) |> 
+  tab_source_note(
+    source_note = "Source: PalmerPenguins package in R."
+  ) |> 
+  tab_footnote(
+    footnote = "Footnote",
+    locations = cells_body(columns = species, rows = 2:3)
+  ) |> 
+  tab_spanner(
+    label = "Penguins",
+    columns = c(year, sex, species, island)
+  ) |>
+  tab_spanner(
+    label = "Measurement",
+    columns = bill_length_mm
+  ) |> 
+  cols_label(
+    bill_length_mm = html("bill length,<br>mm")
+  )
+```
+:::
+
+## Output: Header
+
+```{r}
+penguins_tbl |> 
+  tab_header(
+    title = "Large Bills",
+    subtitle = " By species, island, sex, and year"
+  )
+```
+
+## Adding a source and footnote
+
+``` {.r code-line-numbers="6-8|9-12"}
+penguins_tbl |> 
+  tab_header(
+    title = "Large Bills",
+    subtitle = " By species, island, sex, and year"
+  ) |>
+  tab_source_note(
+    source_note = "Source: PalmerPenguins package in R."
+  ) |> 
+  tab_footnote(
+    footnote = "Footnote",
+    locations = cells_body(columns = species, rows = 2:3)
+  ) |> 
+  tab_spanner(
+    label = "Penguins",
+    columns = c(year, sex, species, island)
+  ) |>
+  tab_spanner(
+    label = "Measurement",
+    columns = bill_length_mm
+  ) |> 
+  cols_label(
+    bill_length_mm = html("bill length,<br>mm")
+  )
+```
+
+## Output: Footnote
+
+```{r}
+penguins_tbl |> 
+tab_footnote(
+    footnote = "Footnote",
+    locations = cells_body(columns = species, rows = 2:3)
+  )
+```
+
+## Output: Source
+
+```{r}
+penguins_tbl |> 
+  tab_source_note(
+    source_note = "Source: PalmerPenguins package in R."
+  )
+```
+
+## Dividing variables into sections with tab_spanner()
+
+``` {.r code-line-numbers="13-20"}
+penguins_tbl |> 
+  tab_header(
+    title = "Large Bills",
+    subtitle = " By species, island, sex, and year"
+  ) |> 
+  tab_source_note(
+    source_note = "Source: PalmerPenguins package in R."
+  ) |> 
+  tab_footnote(
+    footnote = "Footnote",
+    locations = cells_body(columns = species, rows = 2:3)
+  ) |> 
+  tab_spanner(
+    label = "Penguins",
+    columns = c(year, sex, species, island)
+  ) |>
+  tab_spanner(
+    label = "Measurement",
+    columns = bill_length_mm
+  ) |> 
+  cols_label(
+    bill_length_mm = html("bill length,<br>mm")
+  )
+```
+
+## Output: Spanner
+
+```{r}
+penguins_tbl |> 
+   tab_spanner(
+    label = "Penguins",
+    columns = c(year, sex, species, island)
+  ) |>
+  tab_spanner(
+    label = "Measurement",
+    columns = bill_length_mm
+  )
+```
+
+## Adding units or labels to a variable
+
+::: {.nonincremental}
+- Bill length is measured in mm but it is easier to express this with a label
+:::
+
+``` {.r code-line-numbers="13-15"}
+  tab_footnote(
+    footnote = "Footnote",
+    locations = cells_body(columns = species, rows = 2:3)
+  ) |> 
+  tab_spanner(
+    label = "Penguins",
+    columns = c(year, sex, species, island)
+  ) |>
+  tab_spanner(
+    label = "Measurement",
+    columns = bill_length_mm
+  ) |> 
+  cols_label(
+    bill_length_mm = html("bill length,<br>mm")
+  )
+```
+
+## Units on Display
+
+```{r}
+penguins_tbl |> 
+   cols_label(
+    bill_length_mm = html("bill length,<br>mm")
+  )
+```
+
+## Final output with Everything
+
+```{r}
+library(tidyverse)
+library(palmerpenguins)
+library(gt)
+
+penguins <- penguins |> 
+  as_tibble(
+  name = names(penguins),
+  size = bill_length_mm) |> 
+  arrange(desc(island)) |> 
+  select(year, sex, species, island, bill_length_mm) |> 
+  head(n = 20)
+
+penguins_tbl |> 
+  tab_header(
+    title = "Large Bills",
+    subtitle = " By species, island, sex, and year"
+  ) |> 
+  tab_source_note(
+    source_note = "Source: PalmerPenguins package in R."
+  ) |> 
+  tab_footnote(
+    footnote = "Footnote",
+    locations = cells_body(columns = species, rows = 2:3)
+  ) |> 
+  tab_spanner(
+    label = "Penguins",
+    columns = c(year, sex, species, island)
+  ) |>
+  tab_spanner(
+    label = "Measurement",
+    columns = bill_length_mm
+  ) |> 
+  cols_label(
+    bill_length_mm = html("bill length,<br>mm")
+  )
+```
+
+## Hypothetical situation
+
+::: {.nonincremental}
+- Suppose you want to group rows by a theme 
+- St. Olaf Statistics and Data Science were surveyed on their favorite colors to use in R
+  - RColors and their names make up the rcolors variable
+  - Preference is the number of students that identified this rcolor as their favorite 
+:::
+
+## gt table for rcolors 
+
+```{r}
+colors <- c("blue", "lightblue1", "deepskyblue", "deepskyblue1", "deepskyblue2","dodgerblue","navy", "red", "firebrick", "darkred", "orangered4", "orange", "orangered2", "orange3")
+preference <- c("45", "34", "23", "13", "56", "78", "77", "32", "9", "63", "41", "23", "15", "7")
+
+rcolors_data <- data.frame(rcolors = colors, preference = preference)
+rcolors_tbl <- gt(rcolors_data)
+
+rcolors_tbl |> 
+  tab_header(
+    title = "St Olaf Students' Favorite RColors",
+    subtitle = "Primarily blue, red, and orange shades"
+  ) |> 
+  tab_source_note(
+    source_note = "Source: This is not an actual dataset"
+  ) |> 
+  tab_footnote(
+    footnote = "My personal favorite",
+    locations = cells_body(columns = rcolors, rows = 5:5)
+    )
+```
+
+## Stub 
+
+:::: {.columns}
+
+::: {.column width="40%"}
+- The stub is on the left in a display table
+- May contain row group labels
+- Many cases where it is not necessary
+:::
+
+::: {.column width="60%"}
+``` {r}
+rcolors <- rcolors_data |> 
+  gt(rowname_col = "rcolors")
+
+rcolors
+```
+:::
+
+::::
+
+
+## Row Groups with Stub
+
+``` {.r code-line-numbers="2-5|6-9|10-13"}
+rcolors |> 
+  tab_row_group(
+    label = "blue shades",
+    rows = 1:7
+  ) |>
+  tab_row_group(
+    label = "red shades",
+    rows = 8:10
+  ) |>
+  tab_row_group(
+    label = "orange shades",
+    rows = 11:14
+  )
+```
+
+- Three row groups have been made since there are three categories under rcolors (blue, red, orange)
+- Previous table was fine without it
+- Up to user discretion but a fun feature if it adds clarity 
+
+## Resources
+- [Introduction](https://gt.rstudio.com/articles/gt.html)<br>
+- [Reference](https://gt.rstudio.com/reference/index.html)
+
+::: aside
+If you want to learn more about the gt package and how it could apply to your different data needs, check these resources!
+:::
